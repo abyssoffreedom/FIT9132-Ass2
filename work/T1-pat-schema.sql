@@ -1,0 +1,162 @@
+--*****PLEASE ENTER YOUR DETAILS BELOW*****
+--T1-pat-schema.sql
+
+--Student ID:35009411
+--Student Name:Shuyang Yan
+
+
+/* Comments for your marker:
+
+
+
+
+*/
+
+-- Task 1 Add Create table statements for the Missing TABLES below.
+-- Ensure all column comments, and constraints (other than FK's)are included.
+-- FK constraints are to be added at the end of this script
+
+-- OFFICIAL
+CREATE TABLE OFFICIAL (
+    OFF_ID NUMBER(4) NOT NULL,
+    OFF_GIVEN VARCHAR(30),
+    OFF_FAMILY VARCHAR(30),
+    CR_IOC_CODE CHAR(3) NOT NULL,
+    OFF_CDM NUMBER(4)
+);
+
+COMMENT ON COLUMN OFFICIAL.OFF_ID IS
+    'Identifier for an official';
+
+COMMENT ON COLUMN OFFICIAL.OFF_GIVEN IS
+    'Given name for the official';
+
+COMMENT ON COLUMN OFFICIAL.OFF_FAMILY IS
+    'Family name for the official';
+
+COMMENT ON COLUMN OFFICIAL.CR_IOC_CODE IS
+    'IOC country code for the official';
+
+COMMENT ON COLUMN OFFICIAL.OFF_CDM IS
+    'Identifier for Chef De Mission for the official';
+
+ALTER TABLE OFFICIAL
+    ADD CONSTRAINT OFFICIAL_PK PRIMARY KEY (
+        OFF_ID
+    );
+
+-- VEHICLE
+CREATE TABLE VEHICLE (
+    VEH_VIN CHAR(17) NOT NULL,
+    VEH_REGO CHAR(7) NOT NULL,
+    VEH_YEAR DATE NOT NULL,
+    VEH_CURR_ODO NUMBER(6) NOT NULL,
+    VEH_NOPASSENGERS NUMBER(2) NOT NULL,
+    VM_MODEL_ID NUMBER(4) NOT NULL
+);
+
+COMMENT ON COLUMN VEHICLE.VEH_VIN IS
+    'Identifier for vehicle';
+
+COMMENT ON COLUMN VEHICLE.VEH_REGO IS
+    'Registration plate of vehicle';
+
+COMMENT ON COLUMN VEHICLE.VEH_YEAR IS
+    'Year of manufacture of vehicle';
+
+COMMENT ON COLUMN VEHICLE.VEH_CURR_ODO IS
+    'Current odometer reading of vehicle';
+
+COMMENT ON COLUMN VEHICLE.VEH_NOPASSENGERS IS
+    'Number of passengers vehicle can seat';
+
+COMMENT ON COLUMN VEHICLE.VM_MODEL_ID IS
+    'Identifier for vehicle_model';
+
+ALTER TABLE VEHICLE
+    ADD CONSTRAINT VEHICLE_PK PRIMARY KEY (
+        VEH_VIN
+    );
+
+-- TRIP
+CREATE TABLE TRIP (
+    TRIP_ID NUMBER(4) NOT NULL,
+    TRIP_NOPASSENGERS NUMBER(2) NOT NULL,
+    TRIP_INT_PICKUPDT DATE NOT NULL,
+    TRIP_ACT_PICKUPDT DATE,
+    TRIP_INT_DROPOFFDT DATE NOT NULL,
+    TRIP_ACT_DROPOFFDT DATE,
+    VEH_VIN CHAR(17) NOT NULL,
+    DRIVER_ID NUMBER(4) NOT NULL,
+    PICKUP_LOCN_ID NUMBER(3) NOT NULL,
+    DROPOFF_LOCN_ID NUMBER(3) NOT NULL,
+    LANG_ISO_CODE CHAR(2) NOT NULL,
+    OFF_ID NUMBER(4) NOT NULL
+);
+
+COMMENT ON COLUMN TRIP.TRIP_ID IS
+    'Identifier for a trip';
+
+COMMENT ON COLUMN TRIP.TRIP_NOPASSENGERS IS
+    'Number of passengers for the trip';
+
+COMMENT ON COLUMN TRIP.TRIP_INT_PICKUPDT IS
+    'Intended pickup date and time for the trip';
+
+COMMENT ON COLUMN TRIP.TRIP_ACT_PICKUPDT IS
+    'Actual pickup date and time for the trip';
+
+COMMENT ON COLUMN TRIP.TRIP_INT_DROPOFFDT IS
+    'Intended drop-off date and time for the trip';
+
+COMMENT ON COLUMN TRIP.TRIP_ACT_DROPOFFDT IS
+    'Actual drop-off date and time for the trip';
+
+COMMENT ON COLUMN TRIP.VEH_VIN IS
+    'Identifier for a vehicle';
+
+COMMENT ON COLUMN TRIP.DRIVER_ID IS
+    'Identifier for a driver';
+
+COMMENT ON COLUMN TRIP.PICKUP_LOCN_ID IS
+    'Identifier for the pick-up location';
+
+COMMENT ON COLUMN TRIP.DROPOFF_LOCN_ID IS
+    'Identifier for the drop-off location';
+
+COMMENT ON COLUMN TRIP.LANG_ISO_CODE IS
+    'ISO639-1 two-character language codes';
+
+COMMENT ON COLUMN TRIP.OFF_ID IS
+    'Identifier for an officia';
+
+ALTER TABLE TRIP
+    ADD (
+        CONSTRAINT TRIP_PK PRIMARY KEY ( TRIP_ID ),
+        CONSTRAINT TRIP_UQ UNIQUE ( TRIP_INT_PICKUPDT, TRIP_INT_DROPOFFDT, VEH_VIN, DRIVER_ID )
+    );
+
+-- Add all missing FK Constraints below here
+ALTER TABLE OFFICIAL
+    ADD (
+        CONSTRAINT COUNTRY_REGION_OFFICIAL_FK FOREIGN KEY ( CR_IOC_CODE ) REFERENCES COUNTRY_REGION ( CR_IOC_CODE ),
+        CONSTRAINT OFFICIAL_OFFICIAL_FK FOREIGN KEY ( OFF_CDM ) REFERENCES OFFICIAL ( OFF_ID )
+    );
+
+ALTER TABLE VEHICLE
+    ADD CONSTRAINT VEHICLE_MODEL_VEHICLE_FK FOREIGN KEY (
+        VM_MODEL_ID
+    )
+        REFERENCES VEHICLE_MODEL (
+            VM_MODEL_ID
+        );
+
+ALTER TABLE TRIP
+    ADD (
+        CONSTRAINT VEHICLE_TRIP_FK FOREIGN KEY ( VEH_VIN ) REFERENCES VEHICLE ( VEH_VIN ),
+        CONSTRAINT DRIVER_TRIP_FK FOREIGN KEY ( DRIVER_ID ) REFERENCES DRIVER ( DRIVER_ID ),
+        CONSTRAINT LOCATION_TRIP_PICK_FK FOREIGN KEY ( PICKUP_LOCN_ID ) REFERENCES LOCATION ( LOCN_ID ),
+        CONSTRAINT LOCATION_TRIP_DROP_FK FOREIGN KEY ( DROPOFF_LOCN_ID ) REFERENCES LOCATION ( LOCN_ID ),
+        CONSTRAINT LANGUAGE_TRIP_FK FOREIGN KEY ( LANG_ISO_CODE ) REFERENCES LANGUAGE ( LANG_ISO_CODE ),
+        CONSTRAINT OFFICIAL_TRIP_FK FOREIGN KEY ( OFF_ID ) REFERENCES OFFICIAL ( OFF_ID )
+    );
